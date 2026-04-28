@@ -1,9 +1,12 @@
 package de.wbs.view;
 
 import de.wbs.logger.LogEintrag;
+import de.wbs.logger.LogFilter;
 import de.wbs.logger.LogParser;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -30,6 +33,7 @@ public class SwingUI extends JFrame {
     private final JLabel lblStatus = new JLabel(" ");
     private final LogParser parser = new LogParser();
     private List<LogEintrag> eintraege = List.of();
+    private LogFilter filter = new LogFilter();
 
     public SwingUI() {
         super("Log Viewer");
@@ -49,8 +53,27 @@ public class SwingUI extends JFrame {
         toolbar.add(btnLoad);
         //toolbar.add(new JSeparator(SwingConstants.VERTICAL));
         toolbar.add(new JLabel("Level:"));
+        cbLevel.addActionListener(e -> filter_anwenden());
         toolbar.add(cbLevel);
         toolbar.add(new JLabel("Keyword:"));
+        txtKeyword.addActionListener(e -> filter_anwenden());
+        //JTextField speichert nicht String, sondern in Document-Objekt
+        txtKeyword.getDocument().addDocumentListener(new  DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                filter_anwenden();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                filter_anwenden();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                filter_anwenden();
+            }
+        });
         toolbar.add(txtKeyword);
         toolbar.add(btnExport);
 
@@ -67,6 +90,16 @@ public class SwingUI extends JFrame {
         add(lblStatus, BorderLayout.SOUTH);
     }
 
+    private void filter_anwenden() {
+        String level = cbLevel.getSelectedIndex() == 0? "": cbLevel.getSelectedItem().toString();
+        String keyword = txtKeyword.getText();
+        List<LogEintrag> gefiltert = filter.filtere(eintraege, level, keyword);
+        tblModel.setRowCount(0);
+        for (LogEintrag e : gefiltert) {
+            tblModel.addRow(new Object[]{e.zeilennummer(), e.level(), e.nachricht()});
+        }
+    }
+
     private static class LevelRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -74,6 +107,7 @@ public class SwingUI extends JFrame {
             setHorizontalAlignment(CENTER);
             String level = (String) value;
             Color bgFarbe = Color.WHITE;
+            setForeground(Color.BLACK);
             switch (level) {
                 case "FATAL":
                     bgFarbe = new Color(205, 51, 51);
