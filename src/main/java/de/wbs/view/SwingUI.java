@@ -1,6 +1,7 @@
 package de.wbs.view;
 
 import de.wbs.logger.LogEintrag;
+import de.wbs.logger.LogExporter;
 import de.wbs.logger.LogFilter;
 import de.wbs.logger.LogParser;
 
@@ -33,7 +34,9 @@ public class SwingUI extends JFrame {
     private final JLabel lblStatus = new JLabel(" ");
     private final LogParser parser = new LogParser();
     private List<LogEintrag> eintraege = List.of();
+    private List<LogEintrag> gefiltert = List.of();
     private LogFilter filter = new LogFilter();
+    private LogExporter exporter = new LogExporter();
 
     public SwingUI() {
         super("Log Viewer");
@@ -48,6 +51,7 @@ public class SwingUI extends JFrame {
         JButton btnLoad   = new JButton("Laden");
         btnLoad.addActionListener(e -> ladeLogDatei());
         JButton btnExport = new JButton("Export");
+        btnExport.addActionListener(e -> logs_exportieren());
 
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
         toolbar.add(btnLoad);
@@ -90,10 +94,30 @@ public class SwingUI extends JFrame {
         add(lblStatus, BorderLayout.SOUTH);
     }
 
+    private void logs_exportieren() {
+        if(tblModel.getRowCount() == 0) {
+            lblStatus.setText("Keine Logs gefunden");
+            return;
+        }
+        JFileChooser fc = new JFileChooser();
+        fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
+        fc.setSelectedFile(new File("export.log"));
+        if(fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+        //Abstrakte Basisklasse Reader/Writer Klassen, damit ich das
+        //in Tests in Strings schreiben kann. Zudem Logik auslagern
+        try (Writer fw = new BufferedWriter(new FileWriter(fc.getSelectedFile()))) {
+            exporter.exportieren(gefiltert, fw);
+        } catch (Exception e) {
+            lblStatus.setText(e.getMessage());
+        }
+    }
+
     private void filter_anwenden() {
         String level = cbLevel.getSelectedIndex() == 0? "": cbLevel.getSelectedItem().toString();
         String keyword = txtKeyword.getText();
-        List<LogEintrag> gefiltert = filter.filtere(eintraege, level, keyword);
+        gefiltert = filter.filtere(eintraege, level, keyword);
         tblModel.setRowCount(0);
         for (LogEintrag e : gefiltert) {
             tblModel.addRow(new Object[]{e.zeilennummer(), e.level(), e.nachricht()});
