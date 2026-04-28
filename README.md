@@ -1,2 +1,2 @@
 # LogViewer
-## Filtert und speichert Logdateien
+## Filtert, lädt und speichert Logdateien
