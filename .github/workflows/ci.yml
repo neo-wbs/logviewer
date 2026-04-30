@@ -4,12 +4,13 @@ name: CI/CD
 on:
   push:
     branches: ["main"] # bei jedem push auf main
+    tags: ["v*.*.*"] # Bei neuen Tags > löst Release aus
   pull_request:
     branches: ["main"] # bei jedem pull request auf main
 
 jobs:
 
-  # Linting, Tests, Coverage
+  # Job 1: Linting, Tests, Coverage
   build:
     runs-on: ubuntu-latest
 
@@ -33,3 +34,31 @@ jobs:
         with:
           name: jacoco-report
           path: target/site/jacoco/
+
+  # Job 2: Release (läuft nur bei Tags, und nur wenn Job 1 grün war)
+  release:
+    needs: build  # wartet auf Job 1
+    if: startsWith(github.ref, 'refs/tags/v') # nur bei v*-Tags
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # darf GitHub Releases erstellen
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Java 25 einrichten
+        uses: actions/setup-java@v4
+        with:
+          java-version: "25"
+          distribution: "temurin"
+          cache: maven
+
+      # -DskipTests: Tests liefen schon in Job 1, hier nur JAR bauen
+      - name: Fat-JAR bauen
+        run: mvn --batch-mode package -DskipTests
+
+      # JAR als GitHub Release veröffentlichen (Tag-Name wird Release-Name)
+      - name: GitHub Release erstellen
+        uses: softprops/action-gh-release@v2
+        with:
+          files: target/log-viewer.jar
