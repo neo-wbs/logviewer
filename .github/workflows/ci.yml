@@ -1,0 +1,35 @@
+name: CI/CD
+
+#Wann läuft Pipeline (Trigger)
+on:
+  push:
+    branches: ["main"] # bei jedem push auf main
+  pull_request:
+    branches: ["main"] # bei jedem pull request auf main
+
+jobs:
+
+  # Linting, Tests, Coverage
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4 # Code danach in VM
+
+      - name: Java 25 einrichten
+        uses: actions/setup-java@v4
+        with:
+          java-version: "25"
+          distribution: "temurin"
+          cache: maven
+
+      # batch-mode unterdrückt zuviele Ausgaben
+      - name: Lint + Test + Coverage
+        run: mvn --batch-mode verify
+
+      # JaCoCo Report als Artifakt speichern
+      - name: Coverage Report hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/

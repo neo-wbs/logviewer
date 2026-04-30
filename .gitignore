@@ -5,6 +5,7 @@ out/
 .mvn
 *.iml
 *.log
+*.txt
 
 ### Credentials ###
 .env

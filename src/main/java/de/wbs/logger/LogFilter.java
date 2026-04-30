@@ -11,14 +11,14 @@ public class LogFilter {
     }
 
     private boolean passtKeyword(LogEintrag eintrag, String keyword) {
-        if(keyword == null ||  keyword.isEmpty()) {
+        if (keyword == null ||  keyword.isEmpty()) {
             return true;
         }
         return eintrag.nachricht().toLowerCase().contains(keyword.toLowerCase());
     }
 
     private boolean passtLevel(LogEintrag eintrag, String level) {
-        if(level == null || level.isEmpty()) {
+        if (level == null || level.isEmpty()) {
             return true;
         }
         return eintrag.level().equalsIgnoreCase(level);

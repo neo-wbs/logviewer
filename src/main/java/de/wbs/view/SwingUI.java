@@ -25,7 +25,7 @@ public class SwingUI extends JFrame {
 
         @Override
         public Class<?> getColumnClass(int col) { //Je nach Spalte als int oder String interpretieren
-            return col == 0? Integer.class: String.class;
+            return col == 0 ? Integer.class : String.class;
         }
     };
     private final JTable tblLogs = new JTable(tblModel);
@@ -95,14 +95,14 @@ public class SwingUI extends JFrame {
     }
 
     private void logs_exportieren() {
-        if(tblModel.getRowCount() == 0) {
+        if (tblModel.getRowCount() == 0) {
             lblStatus.setText("Keine Logs gefunden");
             return;
         }
         JFileChooser fc = new JFileChooser();
         fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
         fc.setSelectedFile(new File("export.log"));
-        if(fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
+        if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
             return;
         }
         //Abstrakte Basisklasse Reader/Writer Klassen, damit ich das
@@ -115,7 +115,7 @@ public class SwingUI extends JFrame {
     }
 
     private void filter_anwenden() {
-        String level = cbLevel.getSelectedIndex() == 0? "": cbLevel.getSelectedItem().toString();
+        String level = cbLevel.getSelectedIndex() == 0 ? "" : cbLevel.getSelectedItem().toString();
         String keyword = txtKeyword.getText();
         gefiltert = filter.filtere(eintraege, level, keyword);
         tblModel.setRowCount(0);
@@ -159,13 +159,13 @@ public class SwingUI extends JFrame {
     private void ladeLogDatei() {
         JFileChooser opendlg = new JFileChooser();
         opendlg.setCurrentDirectory(new File(System.getProperty("user.dir")));
-        if(opendlg.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
+        if (opendlg.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
             return;
         }
         File datei = opendlg.getSelectedFile();
         try (Reader reader = new BufferedReader(new FileReader(datei))) {
             eintraege = parser.erzeugeEintraege(reader);
-            for(LogEintrag le: eintraege) {
+            for (LogEintrag le: eintraege) {
                 tblModel.addRow(new Object[]{le.zeilennummer(), le.level(), le.nachricht()});
             }
         } catch (IOException e) {

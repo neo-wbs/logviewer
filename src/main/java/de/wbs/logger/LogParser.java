@@ -21,12 +21,12 @@ public class LogParser {
     }
 
     private String extrahiereLevel(String zeile) {
-        if(zeile == null) {
+        if (zeile == null) {
             return "";
         }
         String zeile_gross = zeile.toUpperCase();
-        for(String level: LEVELS) {
-            if(zeile_gross.contains(level)) {
+        for (String level: LEVELS) {
+            if (zeile_gross.contains(level)) {
                 return level;
             }
         }
