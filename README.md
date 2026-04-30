@@ -1,5 +1,5 @@
 # LogViewer
-## Lädt, filtert und speichert Logdateien mit BufferedReader
+## Lädt, filtert und speichert Logdateien
 
 **Ablauf:**
 ```yaml
